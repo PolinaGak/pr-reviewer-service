@@ -14,3 +14,7 @@ app = FastAPI(title="PR Reviewer Assignment Service", version="1.0.0")
 @app.get("/")
 def root():
     return {"message": "PR Reviewer Assignment Service (Fall 2025)"}
+
+@app.get("/health")
+def health_check():
+    return {"status": "ok"}
