@@ -14,3 +14,8 @@ build/
 .idea/
 # OS
 .DS_Store
+# Alembic
+alembic/env.pyc
+alembic/__pycache__/
+alembic/versions/*.pyc
+*.pyc
