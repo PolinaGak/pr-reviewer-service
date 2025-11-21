@@ -30,6 +30,7 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
+
       - name: Run migrations and tests
         run: |
           alembic upgrade head
@@ -43,6 +44,12 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+
+      - name: Set up Docker
+        uses: docker/setup-docker-action@v3
+
+      - name: Set up Docker Compose
+        uses: docker/setup-compose-action@v4
 
       - name: Build and run with docker-compose
         run: |
