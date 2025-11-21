@@ -50,10 +50,10 @@ jobs:
 
       - name: Build and run with docker-compose
         run: |
-          docker compose up --build -d
+          docker compose -f docker-compose.ci.yml up --build -d
           sleep 10
           curl -f http://localhost:8080/health
-          docker compose down
+          docker compose -f docker-compose.ci.yml down -v
         env:
           POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
           POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
