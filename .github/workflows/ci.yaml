@@ -47,7 +47,7 @@ jobs:
 
       - name: Build and run with docker-compose
         run: |
-          docker compose -f docker-compose.ci.yml up --build -d
+          docker compose -f docker-compose.yml up --build -d
           sleep 15
           curl -f http://localhost:8080/health || (docker logs pr-reviewer-service-app-1 && exit 1)
           docker compose -f docker-compose.ci.yml down -v
