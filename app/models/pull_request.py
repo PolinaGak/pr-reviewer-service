@@ -1,5 +1,4 @@
 from sqlalchemy import Column, String, Enum, DateTime, ForeignKey
-from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import ARRAY
 from .base import Base
 import enum
