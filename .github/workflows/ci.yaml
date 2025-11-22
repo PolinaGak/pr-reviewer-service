@@ -2,10 +2,6 @@ name: CI
 
 on: [push, pull_request]
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 jobs:
   test-and-build:
     runs-on: ubuntu-latest
@@ -30,31 +26,20 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Cache pip
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements*.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-
-
       - name: Install dependencies
         run: |
           pip install -r requirements.txt
           pip install -r requirements_dev.txt
 
-      - name: Lint
+      - name: Create test user and database
         run: |
-          ruff check .
-          black --check .
-
-      - name: Create test database
-        run: |
-          PGPASSWORD=${{ secrets.TEST_POSTGRES_PASSWORD }} psql -h localhost -U ${{ secrets.TEST_POSTGRES_USER }} -d ${{ secrets.TEST_POSTGRES_DB }} -c "CREATE DATABASE ${{ secrets.TEST_POSTGRES_DB }};"
+          PGPASSWORD=${{ secrets.TEST_POSTGRES_PASSWORD }} psql -h localhost -U ${{ secrets.TEST_POSTGRES_USER }} -c "\
+            CREATE USER ${{ secrets.TEST_POSTGRES_USER }} WITH PASSWORD '${{ secrets.TEST_POSTGRES_PASSWORD }}'; \
+            CREATE DATABASE ${{ secrets.TEST_POSTGRES_DB }} OWNER ${{ secrets.TEST_POSTGRES_USER }};"
         env:
           PGPASSWORD: ${{ secrets.TEST_POSTGRES_PASSWORD }}
 
-      - name: Run migrations and tests
+      - name: Run tests
         run: pytest
         env:
           TEST_DATABASE_URL: postgresql://${{ secrets.TEST_POSTGRES_USER }}:${{ secrets.TEST_POSTGRES_PASSWORD }}@localhost:5432/${{ secrets.TEST_POSTGRES_DB }}
@@ -62,10 +47,8 @@ jobs:
   docker-test:
     runs-on: ubuntu-latest
     needs: test-and-build
-
     steps:
       - uses: actions/checkout@v4
-
       - name: Build and run with docker-compose
         run: |
           docker compose up --build -d
