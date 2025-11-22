@@ -33,11 +33,11 @@ jobs:
 
       - name: Create test user and database
         run: |
-          PGPASSWORD=${{ secrets.TEST_POSTGRES_PASSWORD }} psql -h localhost -U ${{ secrets.TEST_POSTGRES_USER }} -c "\
+          PGPASSWORD=${{ secrets.POSTGRES_PASSWORD }} psql -h localhost -U ${{ secrets.POSTGRES_USER }} -c "\
             CREATE USER ${{ secrets.TEST_POSTGRES_USER }} WITH PASSWORD '${{ secrets.TEST_POSTGRES_PASSWORD }}'; \
             CREATE DATABASE ${{ secrets.TEST_POSTGRES_DB }} OWNER ${{ secrets.TEST_POSTGRES_USER }};"
         env:
-          PGPASSWORD: ${{ secrets.TEST_POSTGRES_PASSWORD }}
+          PGPASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
 
       - name: Run tests
         run: pytest
