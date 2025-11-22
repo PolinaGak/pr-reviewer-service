@@ -2,21 +2,22 @@ import os
 from dotenv import load_dotenv
 import pytest
 from fastapi.testclient import TestClient
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import NullPool
+
+load_dotenv(".env")
+
+test_db_url = os.getenv("TEST_DATABASE_URL")
+
+os.environ["DATABASE_URL"] = test_db_url
+
 from app.main import app
 from app.models.base import Base
 from app.database import get_db
-from sqlalchemy import text
-
-
-load_dotenv()
-
-TEST_DATABASE_URL = os.getenv("TEST_DATABASE_URL")
 
 test_engine = create_engine(
-    TEST_DATABASE_URL,
+    test_db_url,
     poolclass=NullPool,
 )
 
