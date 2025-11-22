@@ -2,6 +2,11 @@ name: CI
 
 on: [push, pull_request]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+
 jobs:
   test-and-build:
     runs-on: ubuntu-latest
@@ -26,8 +31,21 @@ jobs:
         with:
           python-version: "3.11"
 
+      - name: Cache pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements*.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
       - name: Install dependencies
         run: pip install -r requirements.txt
+
+      - name: Lint
+        run: |
+          ruff check .
+          black --check .
 
       - name: Run migrations and tests
         run: |
@@ -57,7 +75,7 @@ jobs:
       - name: Build and run with docker-compose
         run: |
           docker compose -f docker-compose.yml up --build -d
-          sleep 25 
+          sleep 25
           echo "::group::PostgreSQL Container Logs"
           docker logs pr-reviewer-service-db-1
           echo "::endgroup::"

@@ -1,21 +1,30 @@
-from sqlalchemy.orm import Session
-from ..models.pull_request import PullRequest, PRStatus
-from ..models.user import User
-from datetime import datetime
 import random
+from datetime import datetime
+
+from sqlalchemy.orm import Session
+
+from ..models.pull_request import PRStatus, PullRequest
+from ..models.user import User
+
 
 def get_pr(db: Session, pr_id: str):
     return db.query(PullRequest).filter(PullRequest.pull_request_id == pr_id).first()
 
+
 def _select_reviewers(db: Session, author_id: str, team_name: str):
     """Выбирает до 2 активных ревьюверов из команды автора, исключая автора."""
-    candidates = db.query(User).filter(
-        User.team_name == team_name,
-        User.user_id != author_id,
-        User.is_active == True
-    ).all()
+    candidates = (
+        db.query(User)
+        .filter(
+            User.team_name == team_name,
+            User.user_id != author_id,
+            User.is_active,
+        )
+        .all()
+    )
     random.shuffle(candidates)
     return [u.user_id for u in candidates[:2]]
+
 
 def create_pr(db: Session, pr_data):
     author = db.query(User).filter(User.user_id == pr_data.author_id).first()
@@ -32,12 +41,13 @@ def create_pr(db: Session, pr_data):
         pull_request_name=pr_data.pull_request_name,
         author_id=pr_data.author_id,
         assigned_reviewers=reviewers,
-        status=PRStatus.OPEN
+        status=PRStatus.OPEN,
     )
     db.add(db_pr)
     db.commit()
     db.refresh(db_pr)
     return db_pr
+
 
 def merge_pr(db: Session, pr_id: str):
     pr = get_pr(db, pr_id)
@@ -49,6 +59,7 @@ def merge_pr(db: Session, pr_id: str):
         db.commit()
         db.refresh(pr)
     return pr
+
 
 def reassign_reviewer(db: Session, pr_id: str, old_user_id: str):
     pr = get_pr(db, pr_id)
@@ -64,17 +75,23 @@ def reassign_reviewer(db: Session, pr_id: str, old_user_id: str):
         raise ValueError("NOT_FOUND")
 
     exclude = set(pr.assigned_reviewers + [pr.author_id])
-    candidates = db.query(User).filter(
-        User.team_name == old_user.team_name,
-        User.is_active == True,
-        ~User.user_id.in_(exclude)
-    ).all()
+    candidates = (
+        db.query(User)
+        .filter(
+            User.team_name == old_user.team_name,
+            User.is_active,
+            ~User.user_id.in_(exclude),
+        )
+        .all()
+    )
 
     if not candidates:
         raise ValueError("NO_CANDIDATE")
 
     new_reviewer = random.choice(candidates)
-    new_reviewers = [new_reviewer.user_id if r == old_user_id else r for r in pr.assigned_reviewers]
+    new_reviewers = [
+        new_reviewer.user_id if r == old_user_id else r for r in pr.assigned_reviewers
+    ]
 
     pr.assigned_reviewers = new_reviewers
     db.commit()

@@ -1,9 +1,12 @@
 from sqlalchemy.orm import Session
-from ..models import User, Team
+
+from ..models import Team, User
 from ..schemas.team import TeamCreate
+
 
 def get_team(db: Session, team_name: str):
     return db.query(Team).filter(Team.team_name == team_name).first()
+
 
 def create_team(db: Session, team_data: TeamCreate):
     if get_team(db, team_data.team_name):
@@ -24,7 +27,7 @@ def create_team(db: Session, team_data: TeamCreate):
                 user_id=member.user_id,
                 username=member.username,
                 is_active=member.is_active,
-                team_name=team_data.team_name
+                team_name=team_data.team_name,
             )
             db.add(new_user)
 

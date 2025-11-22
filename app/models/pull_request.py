@@ -1,12 +1,16 @@
-from sqlalchemy import Column, String, Enum, DateTime, ForeignKey
-from sqlalchemy.dialects.postgresql import ARRAY
-from .base import Base
 import enum
 from datetime import datetime
+
+from sqlalchemy import Column, DateTime, Enum, ForeignKey, String
+from sqlalchemy.dialects.postgresql import ARRAY
+
+from .base import Base
+
 
 class PRStatus(str, enum.Enum):
     OPEN = "OPEN"
     MERGED = "MERGED"
+
 
 class PullRequest(Base):
     __tablename__ = "pull_requests"

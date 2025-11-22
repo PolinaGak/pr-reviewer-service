@@ -1,6 +1,6 @@
 from .base import Base
-from .user import User
-from .team import Team
 from .pull_request import PullRequest
+from .team import Team
+from .user import User
 
 __all__ = ["Base", "User", "Team", "PullRequest"]

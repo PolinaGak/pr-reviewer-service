@@ -1,7 +1,8 @@
 from __future__ import annotations
 
-from pydantic import BaseModel
 from typing import List
+
+from pydantic import BaseModel
 
 from .pull_request import PullRequestShort
 
