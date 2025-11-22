@@ -50,9 +50,9 @@ jobs:
 
       - name: Create test database
         run: |
-          PGPASSWORD=${{ secrets.POSTGRES_PASSWORD }} psql -h localhost -U ${{ secrets.POSTGRES_USER }} -d ${{ secrets.POSTGRES_DB }} -c "CREATE DATABASE ${{ secrets.TEST_POSTGRES_DB }};"
+          PGPASSWORD=${{ secrets.TEST_POSTGRES_PASSWORD }} psql -h localhost -U ${{ secrets.TEST_POSTGRES_USER }} -d ${{ secrets.TEST_POSTGRES_DB }} -c "CREATE DATABASE ${{ secrets.TEST_POSTGRES_DB }};"
         env:
-          PGPASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+          PGPASSWORD: ${{ secrets.TEST_POSTGRES_PASSWORD }}
 
       - name: Run migrations and tests
         run: pytest
