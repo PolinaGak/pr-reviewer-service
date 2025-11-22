@@ -3,6 +3,7 @@ from __future__ import annotations
 from datetime import datetime
 from enum import Enum
 from typing import List, Optional
+from pydantic import ConfigDict
 
 from pydantic import BaseModel, Field
 
@@ -18,7 +19,7 @@ class PullRequestShort(BaseModel):
     author_id: str
     status: PRStatus
 
-    model_config = dict(from_attributes=True)
+    model_config = ConfigDict(from_attributes=True)
 
 
 class PullRequestCreate(BaseModel):
@@ -28,15 +29,18 @@ class PullRequestCreate(BaseModel):
 
 
 class PullRequestResponse(BaseModel):
+    model_config = ConfigDict(
+        from_attributes=True,
+        populate_by_name=True
+    )
+
     pull_request_id: str
     pull_request_name: str
     author_id: str
     status: PRStatus
     assigned_reviewers: List[str]
-    created_at: Optional[datetime] = Field(None, alias="createdAt")
     merged_at: Optional[datetime] = Field(None, alias="mergedAt")
-
-    model_config = dict(from_attributes=True)
+    created_at: Optional[datetime] = Field(None, alias="createdAt")
 
 
 class ReassignRequest(BaseModel):

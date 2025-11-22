@@ -1,5 +1,5 @@
 import random
-from datetime import datetime
+from datetime import datetime, timezone
 
 from sqlalchemy.orm import Session
 
@@ -12,7 +12,6 @@ def get_pr(db: Session, pr_id: str):
 
 
 def _select_reviewers(db: Session, author_id: str, team_name: str):
-    """Выбирает до 2 активных ревьюверов из команды автора, исключая автора."""
     candidates = (
         db.query(User)
         .filter(
@@ -22,7 +21,7 @@ def _select_reviewers(db: Session, author_id: str, team_name: str):
         )
         .all()
     )
-    random.shuffle(candidates)
+    candidates = sorted(candidates, key=lambda u: u.user_id)
     return [u.user_id for u in candidates[:2]]
 
 
@@ -55,7 +54,7 @@ def merge_pr(db: Session, pr_id: str):
         raise ValueError("NOT_FOUND")
     if pr.status != PRStatus.MERGED:
         pr.status = PRStatus.MERGED
-        pr.merged_at = datetime.utcnow()
+        pr.merged_at = datetime.now(timezone.utc)
         db.commit()
         db.refresh(pr)
     return pr

@@ -1,7 +1,6 @@
 import enum
-from datetime import datetime
-
 from sqlalchemy import Column, DateTime, Enum, ForeignKey, String
+from datetime import datetime, timezone
 from sqlalchemy.dialects.postgresql import ARRAY
 
 from .base import Base
@@ -20,5 +19,5 @@ class PullRequest(Base):
     author_id = Column(String, ForeignKey("users.user_id"), nullable=False)
     status = Column(Enum(PRStatus), default=PRStatus.OPEN, nullable=False)
     assigned_reviewers = Column(ARRAY(String), default=[], nullable=False)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    merged_at = Column(DateTime, nullable=True)
+    merged_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))

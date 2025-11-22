@@ -6,6 +6,7 @@ from pydantic import BaseModel
 
 from .pull_request import PullRequestShort
 
+from pydantic import ConfigDict
 
 class UserResponse(BaseModel):
     user_id: str
@@ -13,7 +14,7 @@ class UserResponse(BaseModel):
     team_name: str
     is_active: bool
 
-    model_config = dict(from_attributes=True)
+    model_config = ConfigDict(from_attributes=True)
 
 
 class UserSetActive(BaseModel):
@@ -25,4 +26,4 @@ class UserReviewResponse(BaseModel):
     user_id: str
     pull_requests: List[PullRequestShort]
 
-    model_config = dict(from_attributes=True)
+    model_config = ConfigDict(from_attributes=True)
