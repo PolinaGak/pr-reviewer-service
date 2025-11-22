@@ -4,5 +4,5 @@ def make_team(name: str, members: list):
         "members": [
             {"user_id": uid, "username": uname, "is_active": active}
             for uid, uname, active in members
-        ]
+        ],
     }

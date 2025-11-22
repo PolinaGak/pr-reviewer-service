@@ -29,10 +29,7 @@ class PullRequestCreate(BaseModel):
 
 
 class PullRequestResponse(BaseModel):
-    model_config = ConfigDict(
-        from_attributes=True,
-        populate_by_name=True
-    )
+    model_config = ConfigDict(from_attributes=True, populate_by_name=True)
 
     pull_request_id: str
     pull_request_name: str

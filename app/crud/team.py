@@ -4,7 +4,12 @@ from ..schemas.team import TeamCreate
 
 
 def get_team(db: Session, team_name: str):
-    return db.query(Team).options(selectinload(Team.members)).filter(Team.team_name == team_name).first()
+    return (
+        db.query(Team)
+        .options(selectinload(Team.members))
+        .filter(Team.team_name == team_name)
+        .first()
+    )
 
 
 def create_team(db: Session, team_data: TeamCreate):
@@ -32,4 +37,9 @@ def create_team(db: Session, team_data: TeamCreate):
 
     db.commit()
     db.refresh(db_team)
-    return db.query(Team).options(selectinload(Team.members)).filter(Team.team_name == db_team.team_name).first()
+    return (
+        db.query(Team)
+        .options(selectinload(Team.members))
+        .filter(Team.team_name == db_team.team_name)
+        .first()
+    )

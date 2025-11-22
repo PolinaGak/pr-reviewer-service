@@ -12,7 +12,10 @@ app = FastAPI(
 
 app.add_exception_handler(HTTPException, custom_http_exception_handler)
 
-@app.post("/team/add", status_code=201, response_model=schemas.TeamResponse, tags=["Teams"])
+
+@app.post(
+    "/team/add", status_code=201, response_model=schemas.TeamResponse, tags=["Teams"]
+)
 def add_team(team: schemas.TeamCreate, db: Session = Depends(get_db)):
     try:
         db_team = crud.create_team(db, team)
@@ -21,10 +24,12 @@ def add_team(team: schemas.TeamCreate, db: Session = Depends(get_db)):
         if str(e) == "TEAM_EXISTS":
             raise HTTPException(
                 status_code=400,
-                detail={"error": {
-                    "code": ErrorCode.TEAM_EXISTS,
-                    "message": "team_name already exists"
-                }}
+                detail={
+                    "error": {
+                        "code": ErrorCode.TEAM_EXISTS,
+                        "message": "team_name already exists",
+                    }
+                },
             )
         raise HTTPException(status_code=500, detail="Internal server error")
 
@@ -35,10 +40,9 @@ def get_team(team_name: str, db: Session = Depends(get_db)):
     if not team:
         raise HTTPException(
             status_code=404,
-            detail={"error": {
-                "code": ErrorCode.NOT_FOUND,
-                "message": "resource not found"
-            }}
+            detail={
+                "error": {"code": ErrorCode.NOT_FOUND, "message": "resource not found"}
+            },
         )
     return team
 
@@ -52,10 +56,12 @@ def set_user_active(data: schemas.UserSetActive, db: Session = Depends(get_db)):
         if str(e) == "NOT_FOUND":
             raise HTTPException(
                 status_code=404,
-                detail={"error": {
-                    "code": ErrorCode.NOT_FOUND,
-                    "message": "resource not found"
-                }}
+                detail={
+                    "error": {
+                        "code": ErrorCode.NOT_FOUND,
+                        "message": "resource not found",
+                    }
+                },
             )
         raise HTTPException(status_code=500, detail="Internal server error")
 
@@ -66,7 +72,12 @@ def get_user_reviews(user_id: str = Query(...), db: Session = Depends(get_db)):
     return schemas.UserReviewResponse(user_id=user_id, pull_requests=prs)
 
 
-@app.post("/pullRequest/create", status_code=201, response_model=schemas.PullRequestResponse, tags=["PullRequests"])
+@app.post(
+    "/pullRequest/create",
+    status_code=201,
+    response_model=schemas.PullRequestResponse,
+    tags=["PullRequests"],
+)
 def create_pull_request(pr: schemas.PullRequestCreate, db: Session = Depends(get_db)):
     try:
         db_pr = crud.create_pr(db, pr)
@@ -75,58 +86,77 @@ def create_pull_request(pr: schemas.PullRequestCreate, db: Session = Depends(get
         if str(e) == "PR_EXISTS":
             raise HTTPException(
                 status_code=409,
-                detail={"error": {
-                    "code": ErrorCode.PR_EXISTS,
-                    "message": "PR id already exists"
-                }}
+                detail={
+                    "error": {
+                        "code": ErrorCode.PR_EXISTS,
+                        "message": "PR id already exists",
+                    }
+                },
             )
         elif str(e) == "NOT_FOUND":
             raise HTTPException(
                 status_code=404,
-                detail={"error": {
-                    "code": ErrorCode.NOT_FOUND,
-                    "message": "author/team not found"
-                }}
+                detail={
+                    "error": {
+                        "code": ErrorCode.NOT_FOUND,
+                        "message": "author/team not found",
+                    }
+                },
             )
         raise HTTPException(status_code=500, detail="Internal server error")
 
 
-@app.post("/pullRequest/merge", response_model=schemas.PullRequestResponse, tags=["PullRequests"])
+@app.post(
+    "/pullRequest/merge",
+    response_model=schemas.PullRequestResponse,
+    tags=["PullRequests"],
+)
 def merge_pull_request(data: dict, db: Session = Depends(get_db)):
     pr_id = data.get("pull_request_id")
     if not pr_id:
         raise HTTPException(
-            status_code=422,
-            detail="pull_request_id is required in request body"
+            status_code=422, detail="pull_request_id is required in request body"
         )
     db_pr = crud.merge_pr(db, pr_id)
     return schemas.PullRequestResponse.from_orm(db_pr)
 
 
-@app.post("/pullRequest/reassign", response_model=schemas.ReassignResponse, tags=["PullRequests"])
+@app.post(
+    "/pullRequest/reassign",
+    response_model=schemas.ReassignResponse,
+    tags=["PullRequests"],
+)
 def reassign_reviewer(data: schemas.ReassignRequest, db: Session = Depends(get_db)):
     try:
         pr, new_id = crud.reassign_reviewer(db, data.pull_request_id, data.old_user_id)
-        return schemas.ReassignResponse(pr=schemas.PullRequestResponse.from_orm(pr), replaced_by=new_id)
+        return schemas.ReassignResponse(
+            pr=schemas.PullRequestResponse.from_orm(pr), replaced_by=new_id
+        )
 
     except ValueError as e:
         error_map = {
             "PR_MERGED": (ErrorCode.PR_MERGED, 409, "cannot reassign on merged PR"),
-            "NOT_ASSIGNED": (ErrorCode.NOT_ASSIGNED, 409, "reviewer is not assigned to this PR"),
-            "NO_CANDIDATE": (ErrorCode.NO_CANDIDATE, 409, "no active replacement candidate in team"),
+            "NOT_ASSIGNED": (
+                ErrorCode.NOT_ASSIGNED,
+                409,
+                "reviewer is not assigned to this PR",
+            ),
+            "NO_CANDIDATE": (
+                ErrorCode.NO_CANDIDATE,
+                409,
+                "no active replacement candidate in team",
+            ),
             "NOT_FOUND": (ErrorCode.NOT_FOUND, 404, "resource not found"),
         }
 
         if str(e) in error_map:
             code, status, msg = error_map[str(e)]
             raise HTTPException(
-                status_code=status,
-                detail={
-                    "error": {"code": code, "message": msg}
-                }
+                status_code=status, detail={"error": {"code": code, "message": msg}}
             )
 
         raise HTTPException(status_code=500, detail="Internal server error")
+
 
 @app.get("/health", tags=["Health"])
 def health_check():

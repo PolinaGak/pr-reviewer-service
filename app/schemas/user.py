@@ -8,6 +8,7 @@ from .pull_request import PullRequestShort
 
 from pydantic import ConfigDict
 
+
 class UserResponse(BaseModel):
     user_id: str
     username: str

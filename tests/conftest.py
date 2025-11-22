@@ -8,7 +8,6 @@ from sqlalchemy.pool import NullPool
 from app.main import app
 from app.models.base import Base
 from app.database import get_db
-from dotenv import load_dotenv
 from sqlalchemy import text
 
 
@@ -23,6 +22,7 @@ test_engine = create_engine(
 
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=test_engine)
 
+
 @pytest.fixture(scope="session", autouse=True)
 def setup_test_database():
     with test_engine.connect() as conn:
@@ -36,6 +36,7 @@ def setup_test_database():
     yield
     Base.metadata.drop_all(bind=test_engine)
 
+
 @pytest.fixture
 def db_session():
     connection = test_engine.connect()
@@ -47,6 +48,7 @@ def db_session():
     session.close()
     transaction.rollback()
     connection.close()
+
 
 @pytest.fixture
 def client(db_session):
