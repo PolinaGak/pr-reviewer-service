@@ -55,9 +55,7 @@ jobs:
           PGPASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
 
       - name: Run migrations and tests
-        run: |
-          alembic upgrade head
-          pytest
+        run: pytest
         env:
           TEST_DATABASE_URL: postgresql://${{ secrets.TEST_POSTGRES_USER }}:${{ secrets.TEST_POSTGRES_PASSWORD }}@localhost:5432/${{ secrets.TEST_POSTGRES_DB }}
 
