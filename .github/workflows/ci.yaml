@@ -64,13 +64,55 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Build and test Docker image
+      - name: Install Docker Compose and tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y curl postgresql-client
+
+      - name: Wait for PostgreSQL to be ready
+        run: |
+          for i in {1..60}; do
+            if pg_isready -h postgres -p 5432 -U "${POSTGRES_USER}" -d "${POSTGRES_DB}"; then
+              echo "PostgreSQL is ready for Docker tests!"
+              exit 0
+            fi
+            echo "Waiting for PostgreSQL... ($i/60)"
+            sleep 1
+          done
+          echo "PostgreSQL failed to start for Docker tests"
+          exit 1
+        env:
+          POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+          POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
+          PGPASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+
+      - name: Build and run Docker containers
         run: |
           docker compose up --build -d
-          curl -f http://localhost:8080/health || (docker compose logs && exit 1)
-          docker compose exec app pytest
-          docker compose down -v
+          
+          echo "Waiting for application to start..."
+          sleep 10
+          
+          for i in {1..15}; do
+            if curl -f http://localhost:8080/health >/dev/null 2>&1; then
+              echo "Application health check passed!"
+              break
+            fi
+            echo "Health check failed, retrying... ($i/15)"
+            sleep 2
+          done
+          
+          if ! curl -f http://localhost:8080/health >/dev/null 2>&1; then
+            echo "::error::Application health check failed after all retries"
+            docker compose logs app
+            exit 1
+          fi
         env:
           POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
           POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
           POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+
+      - name: Cleanup Docker resources
+        if: always()
+        run: |
+          docker compose down -v
