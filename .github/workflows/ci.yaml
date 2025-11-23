@@ -120,6 +120,7 @@ jobs:
       - name: Run integration tests
         run: |
           pip install -r requirements_dev.txt
+          pip install -r requirements.txt
           pytest tests/integration -v
         env:
           INTEGRATION_TEST_BASE_URL: http://localhost:8080
