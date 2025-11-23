@@ -13,5 +13,5 @@ __all__ = [
     "get_user",
     "get_user_pull_requests",
     "set_user_active",
-    "get_stats"
+    "get_stats",
 ]

@@ -74,12 +74,12 @@ jobs:
           echo "POSTGRES_DB=${{ secrets.POSTGRES_DB }}" >> .env
           echo "POSTGRES_USER=${{ secrets.POSTGRES_USER }}" >> .env
           echo "POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}" >> .env
-          echo "DEBUG=1" >> .env 
+          echo "DEBUG=1" >> .env
 
       - name: Build and run Docker containers
         run: |
           docker compose up --build -d
-          
+
           echo "Waiting for database to be ready..."
           for i in {1..30}; do
             if docker compose exec -T db pg_isready -U "$POSTGRES_USER" -d "$POSTGRES_DB" >/dev/null 2>&1; then
@@ -89,7 +89,7 @@ jobs:
             echo "Waiting for database... ($i/30)"
             sleep 2
           done
-          
+
           echo "Waiting for application to be ready..."
           for i in {1..30}; do
             if curl -f http://localhost:8080/health >/dev/null 2>&1; then
@@ -99,7 +99,7 @@ jobs:
             echo "Waiting for application... ($i/30)"
             sleep 2
           done
-          
+
           if ! curl -f http://localhost:8080/health >/dev/null 2>&1; then
             echo "::error:: Application failed to start"
             echo "::group:: Database Logs"
@@ -110,7 +110,7 @@ jobs:
             echo "::endgroup::"
             exit 1
           fi
-          
+
           echo "Health check passed!"
         env:
           POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
