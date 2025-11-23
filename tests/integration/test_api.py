@@ -11,6 +11,7 @@ def test_health_check():
     assert response.status_code == 200
     assert response.json() == {"status": "ok"}
 
+
 @pytest.mark.integration
 def test_create_team_and_get():
     team_name = "test-team-integ"
