@@ -117,6 +117,13 @@ jobs:
           POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
           POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
 
+      - name: Run integration tests against running Docker
+        run: |
+          pip install -r requirements_dev.txt
+          pytest tests/integration -v
+        env:
+          INTEGRATION_TEST_BASE_URL: http://localhost:8080
+
       - name: Cleanup Docker resources
         if: always()
         run: |

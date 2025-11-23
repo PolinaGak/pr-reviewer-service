@@ -3,3 +3,4 @@ httpx==0.28.1
 ruff==0.9.10
 pre-commit==4.0.1
 black
+requests
