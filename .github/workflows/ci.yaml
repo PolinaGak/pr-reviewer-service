@@ -121,7 +121,7 @@ jobs:
         run: |
           pip install -r requirements_dev.txt
           pip install -r requirements.txt
-          pytest tests/integration -v
+          pytest -m "integration"
         env:
           INTEGRATION_TEST_BASE_URL: http://localhost:8080
 
