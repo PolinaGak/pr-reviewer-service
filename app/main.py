@@ -2,8 +2,9 @@ from fastapi import Depends, FastAPI, HTTPException, Query
 from sqlalchemy.orm import Session
 from . import crud, schemas
 from .database import get_db
+from .crud import get_stats
 from .error_handler import custom_http_exception_handler
-from .schemas.error import ErrorCode
+from .schemas import ErrorCode, StatsResponse
 
 app = FastAPI(
     title="PR Reviewer Assignment Service",
@@ -156,6 +157,12 @@ def reassign_reviewer(data: schemas.ReassignRequest, db: Session = Depends(get_d
             )
 
         raise HTTPException(status_code=500, detail="Internal server error")
+
+
+@app.get("/stats", response_model=StatsResponse, tags=["Statistics"])
+def get_statistics(db: Session = Depends(get_db)):
+    stats = get_stats(db)
+    return stats
 
 
 @app.get("/health", tags=["Health"])

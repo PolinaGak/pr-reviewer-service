@@ -1,4 +1,4 @@
-from .error import ErrorResponse
+from .error import ErrorResponse, ErrorCode, ErrorDetail
 from .pull_request import (
     PullRequestCreate,
     PullRequestResponse,
@@ -8,9 +8,12 @@ from .pull_request import (
 )
 from .team import TeamCreate, TeamMember, TeamResponse
 from .user import UserResponse, UserReviewResponse, UserSetActive
+from .stats import StatsResponse, UserStats, PRStatusStats
 
 __all__ = [
     "ErrorResponse",
+    "ErrorCode",
+    "ErrorDetail",
     "PullRequestCreate",
     "PullRequestResponse",
     "PullRequestShort",
@@ -22,4 +25,8 @@ __all__ = [
     "UserResponse",
     "UserReviewResponse",
     "UserSetActive",
+    "StatsResponse",
+    "PRStatusStats",
+    "UserStats",
 ]
+
