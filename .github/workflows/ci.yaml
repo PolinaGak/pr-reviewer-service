@@ -2,6 +2,11 @@ name: CI
 
 on: [push, pull_request]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+
 jobs:
   test:
     name: Run tests on test DB
@@ -28,10 +33,24 @@ jobs:
         with:
           python-version: "3.11"
 
+      - name: Cache pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements*.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+
       - name: Install dependencies
         run: |
           pip install -r requirements.txt
           pip install -r requirements_dev.txt
+
+      - name: Lint
+        run: |
+          ruff check .
+          black --check .
 
       - name: Run tests
         run: pytest
@@ -61,7 +80,7 @@ jobs:
       - name: Wait for DB to be ready
         run: |
           for i in {1..30}; do
-            if pg_isready -h localhost -U ${{ secrets.POSTGRES_USER }} -d ${{ secrets.POSTGRES_DB }}; then
+            if pg_isready -h db -U ${{ secrets.POSTGRES_USER }} -d ${{ secrets.POSTGRES_DB }}; then
               echo "PostgreSQL is ready"
               exit 0
             fi
